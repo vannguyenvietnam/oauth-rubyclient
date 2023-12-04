@@ -80,11 +80,11 @@ module IntuitOAuth
         response = IntuitOAuth::Transport.request('GET', @client.jwks_uri, nil, nil, false)
         body = response.body
 
-        keys = JSON.parse(body).fetch('keys').first
-        standard_kid = keys.fetch('kid')
+        keys = JSON.parse(body).fetch('keys')
         kid_in_id_token = id_token_header_json.fetch('kid')
+        valid_kid = keys.select { |item| item.fetch('kid').eql?(kid_in_id_token) }.count.positive?
 
-        unless standard_kid.eql? kid_in_id_token
+        unless valid_kid
           return false
         end
 
